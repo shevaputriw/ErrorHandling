@@ -10,6 +10,8 @@ import android.widget.Toast;
 
 import id.putraprima.retrofit.R;
 import id.putraprima.retrofit.api.helper.ServiceGenerator;
+import id.putraprima.retrofit.api.models.ApiError;
+import id.putraprima.retrofit.api.models.ErrorUtils;
 import id.putraprima.retrofit.api.models.RegisterRequest;
 import id.putraprima.retrofit.api.models.RegisterResponse;
 import id.putraprima.retrofit.api.services.ApiInterface;
@@ -37,11 +39,28 @@ public class RegisterActivity extends AppCompatActivity {
         call.enqueue(new Callback<RegisterResponse>() {
             @Override
             public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
-                if(response.body() != null) {
+                if(response.isSuccessful()) {
                     Toast.makeText(RegisterActivity.this, "Akun Berhasil Dibuat, Silahkan login :)", Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    Toast.makeText(RegisterActivity.this, "Terjadi Kesalahan", Toast.LENGTH_SHORT).show();
+                    ApiError error = ErrorUtils.parseError(response);
+                    if(error.getError().getName()!=null && error.getError().getEmail()!=null && error.getError().getPassword()!=null) {
+                        Toast.makeText(RegisterActivity.this, error.getError().getName().get(0) + " , " + error.getError().getEmail().get(0) + " and " + error.getError().getPassword().get(0), Toast.LENGTH_SHORT).show();
+                    }
+                    else if(error.getError().getName()!=null) {
+                        Toast.makeText(RegisterActivity.this, error.getError().getName().get(0), Toast.LENGTH_SHORT).show();
+                    }
+                    else if(error.getError().getEmail()!=null) {
+                        Toast.makeText(RegisterActivity.this, error.getError().getEmail().get(0), Toast.LENGTH_SHORT).show();
+                    }
+                    else if(error.getError().getPassword()!=null) {
+                        for(int i = 0; i < error.getError().getPassword().size(); i++) {
+                            Toast.makeText(RegisterActivity.this, error.getError().getPassword().get(0), Toast.LENGTH_SHORT).show();
+                        }
+                    } else if(error.getError().getConfirm()!=null) {
+                        Toast.makeText(RegisterActivity.this, error.getError().getConfirm().get(0), Toast.LENGTH_SHORT).show();
+                    }
+//                    Toast.makeText(RegisterActivity.this, "Terjadi Kesalahan", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -53,11 +72,17 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void handleRegister(View view) {
-        if(password.length() < 8){
-            Toast.makeText(this, "Password Mininal 8 Karakter", Toast.LENGTH_SHORT).show();
-        }
-        else {
+//        if(password.length() < 8){
+//            Toast.makeText(this, "Password Mininal 8 Karakter", Toast.LENGTH_SHORT).show();
+//        }
+//        else {
             register();
-        }
+//        }
+//        if(password.getText().toString().equals(password_confirmation.getText().toString())) {
+//            register();
+//        }
+//        else {
+//            Toast.makeText(this, "The password confirmation does not match.", Toast.LENGTH_SHORT).show();
+//        }
     }
 }

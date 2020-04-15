@@ -11,6 +11,8 @@ import android.widget.Toast;
 
 import id.putraprima.retrofit.R;
 import id.putraprima.retrofit.api.helper.ServiceGenerator;
+import id.putraprima.retrofit.api.models.ApiError;
+import id.putraprima.retrofit.api.models.ErrorUtils;
 import id.putraprima.retrofit.api.models.LoginRequest;
 import id.putraprima.retrofit.api.models.LoginResponse;
 import id.putraprima.retrofit.api.services.ApiInterface;
@@ -44,12 +46,27 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                Toast.makeText(MainActivity.this, response.body().getToken(), Toast.LENGTH_SHORT).show();
+                if(response.isSuccessful()) {
+                    Toast.makeText(MainActivity.this, response.body().getToken(), Toast.LENGTH_SHORT).show();
 
-                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-                intent.putExtra("TOKEN",response.body().token);
-                intent.putExtra("TOKEN_TYPE",response.body().token_type);
-                startActivity(intent);
+                    Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                    intent.putExtra("TOKEN",response.body().token);
+                    intent.putExtra("TOKEN_TYPE",response.body().token_type);
+                    startActivity(intent);
+                }
+                else {
+                    ApiError error = ErrorUtils.parseError(response);
+                    if(error.getError().getEmail()!=null && error.getError().getPassword()!=null) {
+                        Toast.makeText(MainActivity.this, error.getError().getEmail().get(0) + " and " + error.getError().getPassword().get(0), Toast.LENGTH_SHORT).show();
+                    }
+                    else if(error.getError().getEmail()!=null) {
+                        Toast.makeText(MainActivity.this, error.getError().getEmail().get(0), Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        Toast.makeText(MainActivity.this, error.getError().getPassword().get(0), Toast.LENGTH_SHORT).show();
+                    }
+                }
+
             }
 
             @Override

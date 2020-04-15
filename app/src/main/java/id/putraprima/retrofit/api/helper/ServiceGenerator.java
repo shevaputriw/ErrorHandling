@@ -16,6 +16,11 @@ public class ServiceGenerator {
 
     private static Retrofit retrofit = builder.build();
 
+//    private static Retrofit retrofit;
+    public static Retrofit retrofit() {
+        return retrofit;
+    }
+
     private static HttpLoggingInterceptor logging =
             new HttpLoggingInterceptor()
                     .setLevel(HttpLoggingInterceptor.Level.BODY);
